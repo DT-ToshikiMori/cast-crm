@@ -462,6 +462,10 @@
   {{-- FAB --}}
   <div class="fab-wrap">
     <div class="fab-menu" id="fabMenu">
+      <a href="{{ route('crm.customer.create') }}" class="fab-menu-item">
+        <span class="fab-menu-label">お客さんを追加</span>
+        <span class="fab-menu-icon"><i class="bi bi-person-plus"></i></span>
+      </a>
       <a href="{{ route('crm.memos.quick') }}" class="fab-menu-item">
         <span class="fab-menu-label">ひとことメモ</span>
         <span class="fab-menu-icon"><i class="bi bi-chat-text"></i></span>
