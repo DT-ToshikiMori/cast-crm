@@ -17,11 +17,9 @@ RUN composer dump-autoload --optimize \
     && mkdir -p storage/framework/{cache,sessions,views} \
     && mkdir -p storage/logs \
     && mkdir -p bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod +x docker-entrypoint.sh
 
 EXPOSE 8080
 
-CMD php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan migrate --force \
-    && php -S 0.0.0.0:${PORT:-8080} -t public
+ENTRYPOINT ["bash", "docker-entrypoint.sh"]
