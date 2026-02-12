@@ -44,7 +44,7 @@
 
   <div style="margin-bottom:20px">
     <label class="form-label"><i class="bi bi-currency-yen"></i> 金額（任意）</label>
-    <input name="amount" class="form-control" type="number" placeholder="30000">
+    <input name="amount" class="form-control" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="30000">
   </div>
 
   <div style="margin-bottom:24px">

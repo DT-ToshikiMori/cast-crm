@@ -27,6 +27,10 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('id')
         ->name('crm.customer.show');
 
+    Route::post('/crm/customers/{id}/update', [CastCrmController::class, 'customerUpdate'])
+        ->whereNumber('id')
+        ->name('crm.customer.update');
+
     Route::get('/crm/visits/create', [CastCrmController::class, 'visitCreate'])->name('crm.visits.create');
     Route::post('/crm/visits', [CastCrmController::class, 'visitStore'])->name('crm.visits.store');
 

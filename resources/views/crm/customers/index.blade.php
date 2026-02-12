@@ -21,6 +21,14 @@ $filterLabels = ['all'=>'全部','vip'=>'VIP','stale'=>'最近来てない','bir
         <i class="bi {{ $filterIcons[$key] }}"></i> {{ $label }}
       </a>
     @endforeach
+    @foreach($allTags as $t)
+      @if(!in_array($t, ['VIP']))
+        <a class="pill {{ $filter==='tag:'.$t ? 'active' : '' }}"
+           href="{{ route('crm.customers', ['filter' => 'tag:'.$t, 'q' => $q]) }}">
+          <i class="bi bi-tag"></i> {{ $t }}
+        </a>
+      @endif
+    @endforeach
   </div>
 </form>
 

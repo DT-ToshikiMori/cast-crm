@@ -65,8 +65,19 @@
     </div>
 
     <div style="margin-bottom:20px">
-      <label class="form-label"><i class="bi bi-tags"></i> タグ（カンマ区切り）</label>
-      <input name="tags" class="form-control" value="{{ old('tags') }}" placeholder="例：VIP, シャンパン, 同伴多い">
+      <label class="form-label"><i class="bi bi-tags"></i> タグ</label>
+      <input type="hidden" name="tags" id="tagsInput" value="{{ old('tags') }}">
+      @php $presetTags = ['VIP','太客','シャンパン','ワイン','同伴多い','アフター','指名','フリー','連絡先交換済み','要注意']; @endphp
+      <div id="tagPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        @foreach($presetTags as $pt)
+          <button type="button" class="pill tag-pick" data-tag="{{ $pt }}" onclick="toggleTag(this)">{{ $pt }}</button>
+        @endforeach
+      </div>
+      <div style="display:flex;gap:8px">
+        <input id="customTagInput" class="form-control" placeholder="その他のタグ" style="flex:1">
+        <button type="button" class="btn-glass" onclick="addCustomTag()" style="white-space:nowrap;padding:10px 14px">追加</button>
+      </div>
+      <div id="customTags" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
     </div>
 
     <div style="margin-bottom:24px">
@@ -77,4 +88,43 @@
     <button class="btn-gold w-100" type="submit"><i class="bi bi-check-circle-fill"></i> 登録する</button>
   </form>
 </div>
+
+<script>
+var selectedTags = [];
+(function() {
+  var old = document.getElementById('tagsInput').value;
+  if (old) {
+    old.split(',').forEach(function(t) {
+      t = t.trim();
+      if (!t) return;
+      var btn = document.querySelector('.tag-pick[data-tag="'+t+'"]');
+      if (btn) { btn.classList.add('active'); selectedTags.push(t); }
+      else { addCustomTagValue(t); }
+    });
+  }
+})();
+function syncTags() { document.getElementById('tagsInput').value = selectedTags.join(','); }
+function toggleTag(el) {
+  var tag = el.dataset.tag;
+  var idx = selectedTags.indexOf(tag);
+  if (idx >= 0) { selectedTags.splice(idx, 1); el.classList.remove('active'); }
+  else { selectedTags.push(tag); el.classList.add('active'); }
+  syncTags();
+}
+function addCustomTag() {
+  var input = document.getElementById('customTagInput');
+  var tag = input.value.trim();
+  if (!tag || selectedTags.indexOf(tag) >= 0) return;
+  addCustomTagValue(tag);
+  input.value = '';
+}
+function addCustomTagValue(tag) {
+  selectedTags.push(tag);
+  var el = document.createElement('button');
+  el.type = 'button'; el.className = 'pill active'; el.textContent = tag + ' ✕';
+  el.onclick = function() { selectedTags.splice(selectedTags.indexOf(tag), 1); el.remove(); syncTags(); };
+  document.getElementById('customTags').appendChild(el);
+  syncTags();
+}
+</script>
 @endsection

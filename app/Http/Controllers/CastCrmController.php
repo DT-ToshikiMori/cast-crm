@@ -33,7 +33,12 @@ class CastCrmController extends Controller
         $q = trim((string) $request->query('q', ''));
         $filter = (string) $request->query('filter', 'all');
 
-        $customers = auth()->user()->customers;
+        $allCustomers = auth()->user()->customers;
+
+        // Collect all unique tags for filter pills
+        $allTags = $allCustomers->flatMap(fn ($c) => $c->tag ?? [])->unique()->sort()->values();
+
+        $customers = $allCustomers;
 
         if ($q !== '') {
             $customers = $customers->filter(function ($c) use ($q) {
@@ -48,11 +53,14 @@ class CastCrmController extends Controller
             $customers = $customers->filter(fn ($c) => $c->days_since_last_visit >= 45);
         } elseif ($filter === 'birthday') {
             $customers = $customers->filter(fn ($c) => !empty($c->birthday));
+        } elseif (str_starts_with($filter, 'tag:')) {
+            $tagName = substr($filter, 4);
+            $customers = $customers->filter(fn ($c) => in_array($tagName, $c->tag ?? [], true));
         }
 
         $customers = $customers->sortBy('name')->values();
 
-        return view('crm.customers.index', compact('customers', 'q', 'filter'));
+        return view('crm.customers.index', compact('customers', 'q', 'filter', 'allTags'));
     }
 
     public function customerShow(int $id)
@@ -116,6 +124,40 @@ class CastCrmController extends Controller
         return redirect()
             ->route('crm.customer.show', $customer->id)
             ->with('status', 'お客さんを登録したよ');
+    }
+
+    public function customerUpdate(Request $request, int $id)
+    {
+        $customer = auth()->user()->customers()->findOrFail($id);
+        $field = $request->input('field');
+
+        if ($field === 'birthday') {
+            $data = $request->validate([
+                'birthday_month' => ['nullable', 'integer', 'between:1,12'],
+                'birthday_day' => ['nullable', 'integer', 'between:1,31'],
+            ]);
+            $birthday = null;
+            if (!empty($data['birthday_month']) && !empty($data['birthday_day'])) {
+                $birthday = sprintf('%02d-%02d', $data['birthday_month'], $data['birthday_day']);
+            }
+            $customer->update(['birthday' => $birthday]);
+            return redirect()->route('crm.customer.show', $id)->with('status', '誕生日を更新したよ');
+        }
+
+        if ($field === 'tags') {
+            $data = $request->validate([
+                'tags' => ['nullable', 'string', 'max:300'],
+            ]);
+            $tags = collect(explode(',', (string) ($data['tags'] ?? '')))
+                ->map(fn ($t) => trim($t))
+                ->filter()
+                ->values()
+                ->all();
+            $customer->update(['tag' => $tags]);
+            return redirect()->route('crm.customer.show', $id)->with('status', 'タグを更新したよ');
+        }
+
+        return redirect()->route('crm.customer.show', $id);
     }
 
     // ── 来店記録 ──
