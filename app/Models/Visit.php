@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Visit extends Model
 {
-    protected $fillable = ['customer_id', 'type', 'date', 'time', 'amount', 'note'];
+    protected $fillable = ['user_id', 'customer_id', 'type', 'date', 'time', 'amount', 'note'];
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
 
     public function customer()
     {

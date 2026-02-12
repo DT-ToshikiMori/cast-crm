@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'line' => [
+        'liff_id' => env('LIFF_ID', ''),
+    ],
+
 ];

@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    protected $fillable = ['name', 'birthday', 'tag'];
+    protected $fillable = ['user_id', 'name', 'birthday', 'tag'];
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
 
     protected $casts = [
         'tag' => 'array',

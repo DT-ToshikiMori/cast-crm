@@ -12,9 +12,7 @@ class CastCrmController extends Controller
 {
     public function home()
     {
-        $customers = Customer::all()->each(function ($c) {
-            $c->setRelation('visits', $c->visits);
-        });
+        $customers = auth()->user()->customers()->with('visits')->get();
 
         $birthdaySoon = $customers
             ->filter(fn ($c) => !empty($c->birthday))
@@ -32,7 +30,7 @@ class CastCrmController extends Controller
         $q = trim((string) $request->query('q', ''));
         $filter = (string) $request->query('filter', 'all');
 
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
 
         if ($q !== '') {
             $customers = $customers->filter(function ($c) use ($q) {
@@ -56,7 +54,7 @@ class CastCrmController extends Controller
 
     public function customerShow(int $id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = auth()->user()->customers()->findOrFail($id);
 
         return view('crm.customers.show', compact('customer'));
     }
@@ -81,7 +79,7 @@ class CastCrmController extends Controller
             ->values()
             ->all();
 
-        $customer = Customer::create([
+        $customer = auth()->user()->customers()->create([
             'name' => $data['name'],
             'birthday' => $data['birthday'] ?: null,
             'tag' => $tags,
@@ -115,7 +113,7 @@ class CastCrmController extends Controller
             'note' => ['nullable', 'string', 'max:500'],
         ]);
 
-        Visit::create([
+        auth()->user()->visits()->create([
             'customer_id' => null,
             'type' => $data['type'],
             'date' => now()->toDateString(),
@@ -133,7 +131,7 @@ class CastCrmController extends Controller
 
     public function visitsUnassigned()
     {
-        $unassignedVisits = Visit::whereNull('customer_id')->orderByDesc('created_at')->get();
+        $unassignedVisits = auth()->user()->visits()->whereNull('customer_id')->orderByDesc('created_at')->get();
 
         return view('crm.visits.unassigned', compact('unassignedVisits'));
     }
@@ -143,9 +141,9 @@ class CastCrmController extends Controller
         $q = trim((string) $request->query('q', ''));
         $selectedCustomerId = $request->query('customer_id');
 
-        $visit = Visit::whereNull('customer_id')->findOrFail($visitId);
+        $visit = auth()->user()->visits()->whereNull('customer_id')->findOrFail($visitId);
 
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
 
         if ($q !== '') {
             $customers = $customers->filter(function ($c) use ($q) {
@@ -165,7 +163,11 @@ class CastCrmController extends Controller
             'customer_id' => ['required', 'exists:customers,id'],
         ]);
 
-        $visit = Visit::whereNull('customer_id')->findOrFail($visitId);
+        $visit = auth()->user()->visits()->whereNull('customer_id')->findOrFail($visitId);
+
+        // Ensure the customer belongs to this user
+        auth()->user()->customers()->findOrFail($data['customer_id']);
+
         $visit->update(['customer_id' => $data['customer_id']]);
 
         return redirect()
@@ -180,7 +182,7 @@ class CastCrmController extends Controller
         $q = trim((string) $request->query('q', ''));
         $selectedId = $request->query('customer_id');
 
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
 
         if ($q !== '') {
             $customers = $customers->filter(function ($c) use ($q) {
@@ -200,6 +202,9 @@ class CastCrmController extends Controller
             'customer_id' => ['required', 'exists:customers,id'],
             'text' => ['required', 'string', 'max:500'],
         ]);
+
+        // Ensure the customer belongs to this user
+        auth()->user()->customers()->findOrFail($data['customer_id']);
 
         Memo::create([
             'customer_id' => $data['customer_id'],

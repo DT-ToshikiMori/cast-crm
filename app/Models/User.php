@@ -21,7 +21,19 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'line_user_id',
+        'line_picture_url',
     ];
+
+    public function customers()
+    {
+        return $this->hasMany(\App\Models\Customer::class);
+    }
+
+    public function visits()
+    {
+        return $this->hasMany(\App\Models\Visit::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

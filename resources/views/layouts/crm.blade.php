@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="liff-id" content="{{ config('services.line.liff_id') }}">
   <title>@yield('title', 'お客さんメモ')</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -33,7 +35,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
       <div>
         <div class="fw-bold">キャストメモ</div>
-        <div class="text-muted small">“管理”じゃなく、思い出すためのメモ。</div>
+        <div class="text-muted small">"管理"じゃなく、思い出すためのメモ。</div>
       </div>
     </div>
     <a href="{{ route('crm.visits.create') }}" class="btn btn-dark btn-sm rounded-pill">来店を記録</a>
@@ -54,5 +56,43 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+  (function() {
+    const liffId = document.querySelector('meta[name="liff-id"]').content;
+
+    // LIFF_ID が空ならLIFF認証をスキップ（ローカル開発用）
+    if (!liffId) return;
+
+    liff.init({ liffId: liffId }).then(function() {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+
+      liff.getProfile().then(function(profile) {
+        fetch('/auth/line', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          },
+          body: JSON.stringify({
+            line_user_id: profile.userId,
+            name: profile.displayName,
+            picture_url: profile.pictureUrl || null,
+          }),
+        }).then(function(res) {
+          if (res.ok) {
+            // Already on an auth-required page, so session is set — no reload needed
+            // unless this was a fresh login
+          }
+        });
+      });
+    }).catch(function(err) {
+      console.error('LIFF init error:', err);
+    });
+  })();
+  </script>
 </body>
 </html>
