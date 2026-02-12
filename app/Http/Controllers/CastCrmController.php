@@ -22,7 +22,9 @@ class CastCrmController extends Controller
             ->sortByDesc('days_since_last_visit')
             ->take(5);
 
-        return view('crm.home', compact('birthdaySoon', 'stale'));
+        $unassignedCount = auth()->user()->visits()->whereNull('customer_id')->count();
+
+        return view('crm.home', compact('birthdaySoon', 'stale', 'unassignedCount'));
     }
 
     public function customers(Request $request)

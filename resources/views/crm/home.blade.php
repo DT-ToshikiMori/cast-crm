@@ -7,16 +7,18 @@ $avatarColors = ['#9b59b6','#e91e63','#3498db','#1abc9c','#e67e22','#e74c3c'];
 
 @section('content')
 
+@if($unassignedCount > 0)
 <div class="alert-glass mt-2">
   <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
   <div class="alert-body">
-    <div class="alert-title">未整理の来店があります</div>
+    <div class="alert-title">未整理の来店が{{ $unassignedCount }}件あります</div>
     <div class="alert-text">あとでお客さんを選べます</div>
   </div>
   <a href="{{ route('crm.visits.unassigned') }}" class="btn-glass" style="white-space:nowrap">
     整理する <i class="bi bi-arrow-right"></i>
   </a>
 </div>
+@endif
 
 <div class="card-glass">
   <div class="card-title">
