@@ -445,6 +445,18 @@
 
     /* Override Bootstrap alert */
     .alert { border-radius: var(--radius-md); }
+
+    /* ── Submit spinner ── */
+    .submit-spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: var(--bg-primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -529,6 +541,21 @@
     if (!liffId) return;
     liff.init({ liffId: liffId }).catch(function(err) { console.error('LIFF init error:', err); });
   })();
+
+  // Form submit loading state
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    var btn = form.querySelector('button[type="submit"]');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="submit-spinner"></span> 処理中...';
+    // Re-enable after 8s as safety net
+    setTimeout(function() {
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.originalText;
+    }, 8000);
+  });
   </script>
 </body>
 </html>
