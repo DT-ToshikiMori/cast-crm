@@ -48,8 +48,20 @@
 
     <div style="margin-bottom:20px">
       <label class="form-label"><i class="bi bi-gift"></i> 誕生日（任意）</label>
-      <input name="birthday" class="form-control" value="{{ old('birthday') }}" placeholder="例：02-10">
-      <div class="form-text">年は入れなくてOK</div>
+      <div style="display:flex;gap:10px">
+        <select name="birthday_month" class="form-select" style="flex:1">
+          <option value="">月</option>
+          @for($m = 1; $m <= 12; $m++)
+            <option value="{{ $m }}" {{ old('birthday_month') == $m ? 'selected' : '' }}>{{ $m }}月</option>
+          @endfor
+        </select>
+        <select name="birthday_day" class="form-select" style="flex:1">
+          <option value="">日</option>
+          @for($d = 1; $d <= 31; $d++)
+            <option value="{{ $d }}" {{ old('birthday_day') == $d ? 'selected' : '' }}>{{ $d }}日</option>
+          @endfor
+        </select>
+      </div>
     </div>
 
     <div style="margin-bottom:20px">

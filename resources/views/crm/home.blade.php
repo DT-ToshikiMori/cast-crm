@@ -71,10 +71,20 @@ $avatarColors = ['#9b59b6','#e91e63','#3498db','#1abc9c','#e67e22','#e74c3c'];
       <span class="days-ind {{ $dClass }}">{{ $d }}日</span>
     </a>
   @empty
-    <div class="empty-state">
-      <i class="bi bi-emoji-smile"></i>
-      <div class="empty-title">みんな来てくれてる！</div>
-    </div>
+    @if($customerCount === 0)
+      <div class="empty-state">
+        <i class="bi bi-person-plus"></i>
+        <div class="empty-title">まずはお客さんを追加しましょう！</div>
+        <a href="{{ route('crm.customer.create') }}" class="btn-gold" style="margin-top:12px">
+          <i class="bi bi-person-plus-fill"></i> 追加する
+        </a>
+      </div>
+    @else
+      <div class="empty-state">
+        <i class="bi bi-emoji-smile"></i>
+        <div class="empty-title">みんな来てくれてる！</div>
+      </div>
+    @endif
   @endforelse
 </div>
 @endsection

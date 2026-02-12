@@ -523,20 +523,11 @@
     }
   });
 
-  // LIFF
+  // LIFF (init only — authentication is handled by /liff-init)
   (function() {
     var liffId = document.querySelector('meta[name="liff-id"]').content;
     if (!liffId) return;
-    liff.init({ liffId: liffId }).then(function() {
-      if (!liff.isLoggedIn()) { liff.login(); return; }
-      liff.getProfile().then(function(profile) {
-        fetch('/auth/line', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-          body: JSON.stringify({ line_user_id: profile.userId, name: profile.displayName, picture_url: profile.pictureUrl || null }),
-        });
-      });
-    }).catch(function(err) { console.error('LIFF init error:', err); });
+    liff.init({ liffId: liffId }).catch(function(err) { console.error('LIFF init error:', err); });
   })();
   </script>
 </body>

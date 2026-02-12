@@ -23,8 +23,9 @@ class CastCrmController extends Controller
             ->take(5);
 
         $unassignedCount = auth()->user()->visits()->whereNull('customer_id')->count();
+        $customerCount = $customers->count();
 
-        return view('crm.home', compact('birthdaySoon', 'stale', 'unassignedCount'));
+        return view('crm.home', compact('birthdaySoon', 'stale', 'unassignedCount', 'customerCount'));
     }
 
     public function customers(Request $request)
@@ -70,10 +71,16 @@ class CastCrmController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:40'],
-            'birthday' => ['nullable', 'regex:/^\d{2}-\d{2}$/'],
+            'birthday_month' => ['nullable', 'integer', 'between:1,12'],
+            'birthday_day' => ['nullable', 'integer', 'between:1,31'],
             'tags' => ['nullable', 'string', 'max:120'],
             'memo' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $birthday = null;
+        if (!empty($data['birthday_month']) && !empty($data['birthday_day'])) {
+            $birthday = sprintf('%02d-%02d', $data['birthday_month'], $data['birthday_day']);
+        }
 
         $tags = collect(explode(',', (string) ($data['tags'] ?? '')))
             ->map(fn ($t) => trim($t))
@@ -83,7 +90,7 @@ class CastCrmController extends Controller
 
         $customer = auth()->user()->customers()->create([
             'name' => $data['name'],
-            'birthday' => $data['birthday'] ?: null,
+            'birthday' => $birthday,
             'tag' => $tags,
         ]);
 
