@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/ceo/.claude-worktrees/cast-crm/nervous-robinson log --oneline -10)"
+    ]
+  }
+}
