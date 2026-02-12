@@ -75,7 +75,7 @@ $avatarColors = ['#9b59b6','#e91e63','#3498db','#1abc9c','#e67e22','#e74c3c'];
       <div class="empty-state">
         <i class="bi bi-person-plus"></i>
         <div class="empty-title">まずはお客さんを追加しましょう！</div>
-        <a href="{{ route('crm.customer.create') }}" class="btn-gold" style="margin-top:12px">
+        <a href="{{ route('crm.customer.create') }}" class="btn-glass" style="margin-top:12px;font-size:13px;padding:8px 18px;min-height:36px">
           <i class="bi bi-person-plus-fill"></i> 追加する
         </a>
       </div>
