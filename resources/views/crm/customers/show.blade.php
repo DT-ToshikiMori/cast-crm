@@ -7,7 +7,7 @@
       <div>
         <div class="fs-5 fw-bold">{{ $customer['name'] }}</div>
         <div class="small text-muted">
-          最終来店：{{ $customer['last_visit'] }}（{{ $customer['days_since_last_visit'] }}日）
+          最終来店：{{ $customer['last_visit'] ?? '-' }}（{{ $customer['days_since_last_visit'] }}日）
           / 誕生日：{{ $customer['birthday'] ?? '未設定' }}
         </div>
         <div class="mt-2 d-flex gap-1 flex-wrap">

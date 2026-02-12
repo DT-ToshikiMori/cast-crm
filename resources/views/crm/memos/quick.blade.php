@@ -2,9 +2,13 @@
 @section('title', 'ひとことメモ')
 
 @section('content')
+  @if (session('status'))
+    <div class="alert alert-success mt-3">{{ session('status') }}</div>
+  @endif
+
   <div class="card p-3 mt-3 mb-3">
     <div class="fw-bold mb-1">ひとことメモ（来店なし）</div>
-    <div class="text-muted small">LINE返した・電話した・約束が流れた…みたいな“関係性ログ”を残す用。</div>
+    <div class="text-muted small">LINE返した・電話した・約束が流れた…みたいな"関係性ログ"を残す用。</div>
   </div>
 
   <form class="card p-3 mb-3" method="get" action="{{ route('crm.memos.quick') }}">
@@ -34,7 +38,7 @@
             <input class="form-check-input mt-1" type="radio" name="customer_pick" {{ $isSelected ? 'checked' : '' }}>
             <div>
               <div class="fw-semibold">{{ $c['name'] }}</div>
-              <div class="small text-muted">最終来店：{{ $c['last_visit'] }}（{{ $c['days_since_last_visit'] }}日）</div>
+              <div class="small text-muted">最終来店：{{ $c['last_visit'] ?? '-' }}（{{ $c['days_since_last_visit'] }}日）</div>
               <div class="mt-1 d-flex gap-1 flex-wrap">
                 @foreach($c['tag'] as $t)
                   <span class="badge text-bg-light">{{ $t }}</span>
@@ -54,7 +58,8 @@
     </div>
   </div>
 
-  <div class="card p-3">
+  <form class="card p-3" method="post" action="{{ route('crm.memos.quickStore') }}">
+    @csrf
     <div class="fw-bold mb-2">メモを書く</div>
 
     <div class="mb-2 small text-muted">
@@ -63,19 +68,16 @@
         <span class="fw-semibold">
           {{ optional($customers->firstWhere('id', (int)$selectedId))['name'] ?? '（一覧から選んでね）' }}
         </span>
+        <input type="hidden" name="customer_id" value="{{ $selectedId }}">
       @else
         <span class="fw-semibold">（未選択）</span>
       @endif
     </div>
 
-    <textarea class="form-control" rows="3" placeholder="例：仕事トラブルで今週は厳しそう。責めるのNG。"></textarea>
+    <textarea name="text" class="form-control" rows="3" placeholder="例：仕事トラブルで今週は厳しそう。責めるのNG。"></textarea>
 
-    <button class="btn btn-dark w-100 rounded-pill mt-3" type="button">
-      保存（見た目だけ）
+    <button class="btn btn-dark w-100 rounded-pill mt-3" type="submit" {{ empty($selectedId) ? 'disabled' : '' }}>
+      保存
     </button>
-
-    <div class="text-muted small mt-2">
-      ※ 今はUIだけ。次のステップでPOST＋セッション保存 or DB保存にする。
-    </div>
-  </div>
+  </form>
 @endsection

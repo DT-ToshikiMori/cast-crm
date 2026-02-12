@@ -23,6 +23,10 @@ Route::get('/crm/customers/{id}', [CastCrmController::class, 'customerShow'])
     ->name('crm.customer.show');
 
 Route::get('/crm/visits/create', [CastCrmController::class, 'visitCreate'])->name('crm.visits.create');
+Route::post('/crm/visits', [CastCrmController::class, 'visitStore'])->name('crm.visits.store');
+
+Route::post('/crm/memos/quick', [CastCrmController::class, 'memoQuickStore'])->name('crm.memos.quickStore');
+
 Route::get('/crm/reminders', [CastCrmController::class, 'reminders'])->name('crm.reminders');
 Route::get('/crm/settings', [CastCrmController::class, 'settings'])->name('crm.settings');
 
@@ -32,3 +36,7 @@ Route::get('/crm/visits/unassigned', [CastCrmController::class, 'visitsUnassigne
 Route::get('/crm/visits/unassigned/{visitId}/assign', [CastCrmController::class, 'visitAssign'])
     ->whereNumber('visitId')
     ->name('crm.visits.assign');
+
+Route::post('/crm/visits/unassigned/{visitId}/assign', [CastCrmController::class, 'visitAssignStore'])
+    ->whereNumber('visitId')
+    ->name('crm.visits.assignStore');

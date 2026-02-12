@@ -16,7 +16,7 @@
       @endforeach
     </div>
   </form>
-  <a class="btn btn-dark btn-sm rounded-pill" href="{{ route('crm.customer.create') }}">＋ お客さん追加</a>
+  <a class="btn btn-dark btn-sm rounded-pill mb-3" href="{{ route('crm.customer.create') }}">＋ お客さん追加</a>
 
   <div class="card p-3">
     <div class="fw-bold mb-2">結果：{{ $customers->count() }}件</div>

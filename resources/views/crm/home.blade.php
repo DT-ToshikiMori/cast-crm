@@ -44,7 +44,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 {{ !$loop->first ? 'border-top' : '' }}">
           <div>
             <div class="fw-semibold text-dark">{{ $c['name'] }}</div>
-            <div class="small text-muted">最終来店：{{ $c['last_visit'] }}（{{ $c['days_since_last_visit'] }}日）</div>
+            <div class="small text-muted">最終来店：{{ $c['last_visit'] ?? '-' }}（{{ $c['days_since_last_visit'] }}日）</div>
           </div>
           <span class="badge text-bg-light">見る</span>
         </div>

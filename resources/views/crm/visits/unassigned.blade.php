@@ -2,6 +2,10 @@
 @section('title', '未整理の来店ログ')
 
 @section('content')
+  @if (session('status'))
+    <div class="alert alert-success mt-3">{{ session('status') }}</div>
+  @endif
+
   <div class="card p-3 mt-3 mb-3">
     <div class="fw-bold mb-1">未整理の来店ログ</div>
     <div class="text-muted small">

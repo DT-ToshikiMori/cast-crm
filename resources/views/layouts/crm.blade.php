@@ -32,7 +32,7 @@
   <div class="container py-3" style="max-width: 520px;">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <div>
-        <div class="fw-bold">お客さんメモ</div>
+        <div class="fw-bold">キャストメモ</div>
         <div class="text-muted small">“管理”じゃなく、思い出すためのメモ。</div>
       </div>
     </div>

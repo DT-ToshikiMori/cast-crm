@@ -91,7 +91,8 @@
     @endforelse
   </div>
 
-  <div class="card p-3">
+  <form class="card p-3" method="post" action="{{ route('crm.visits.assignStore', $visit['id']) }}">
+    @csrf
     <div class="fw-bold mb-2">確認</div>
 
     <div class="small text-muted mb-2">
@@ -100,17 +101,14 @@
         <span class="fw-semibold">
           {{ optional($customers->firstWhere('id', (int)$selectedCustomerId))['name'] ?? '（一覧から選んでね）' }}
         </span>
+        <input type="hidden" name="customer_id" value="{{ $selectedCustomerId }}">
       @else
         <span class="fw-semibold">（未選択）</span>
       @endif
     </div>
 
-    <button class="btn btn-dark w-100 rounded-pill" type="button" {{ empty($selectedCustomerId) ? 'disabled' : '' }}>
-      紐づける（見た目だけ）
+    <button class="btn btn-dark w-100 rounded-pill" type="submit" {{ empty($selectedCustomerId) ? 'disabled' : '' }}>
+      紐づける
     </button>
-
-    <div class="text-muted small mt-2">
-      ※ 今は画面のみ。次のステップでPOSTして未整理から消える挙動にする。
-    </div>
-  </div>
+  </form>
 @endsection
