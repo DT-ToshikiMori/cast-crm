@@ -1,43 +1,71 @@
 @extends('layouts.crm')
 @section('title', 'お客さん一覧')
 
+@php
+$avatarColors = ['#9b59b6','#e91e63','#3498db','#1abc9c','#e67e22','#e74c3c'];
+$filterIcons = ['all'=>'bi-grid-fill','vip'=>'bi-star-fill','stale'=>'bi-clock-history','birthday'=>'bi-gift'];
+$filterLabels = ['all'=>'全部','vip'=>'VIP','stale'=>'最近来てない','birthday'=>'誕生日あり'];
+@endphp
+
 @section('content')
-  <form class="card p-3 mb-3" method="get" action="{{ route('crm.customers') }}">
-    <div class="mb-2 fw-bold">検索</div>
-    <div class="input-group">
-      <input name="q" value="{{ $q }}" class="form-control" placeholder="名前 / タグ で検索">
-      <button class="btn btn-dark">検索</button>
-    </div>
-    <div class="mt-2 d-flex gap-2 flex-wrap">
-      @php $filters = ['all'=>'全部','vip'=>'VIP','stale'=>'最近来てない','birthday'=>'誕生日あり']; @endphp
-      @foreach($filters as $key => $label)
-        <a class="btn btn-sm {{ $filter===$key ? 'btn-dark' : 'btn-outline-dark' }} rounded-pill"
-           href="{{ route('crm.customers', ['filter' => $key, 'q' => $q]) }}">{{ $label }}</a>
-      @endforeach
-    </div>
-  </form>
-  <a class="btn btn-dark btn-sm rounded-pill mb-3" href="{{ route('crm.customer.create') }}">＋ お客さん追加</a>
 
-  <div class="card p-3">
-    <div class="fw-bold mb-2">結果：{{ $customers->count() }}件</div>
-
-    @forelse($customers as $c)
-      <a class="text-decoration-none" href="{{ route('crm.customer.show', $c['id']) }}">
-        <div class="py-2 {{ !$loop->first ? 'border-top' : '' }}">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="fw-semibold text-dark">{{ $c['name'] }}</div>
-            <div class="small text-muted">{{ $c['days_since_last_visit'] }}日</div>
-          </div>
-          <div class="small text-muted">最終来店：{{ $c['last_visit'] }} / 誕生日：{{ $c['birthday'] ?? '-' }}</div>
-          <div class="mt-1 d-flex gap-1 flex-wrap">
-            @foreach($c['tag'] as $t)
-              <span class="badge text-bg-light">{{ $t }}</span>
-            @endforeach
-          </div>
-        </div>
-      </a>
-    @empty
-      <div class="text-muted">見つからなかった</div>
-    @endforelse
+<form class="card-glass" method="get" action="{{ route('crm.customers') }}">
+  <div class="search-wrap mb-3">
+    <i class="bi bi-search"></i>
+    <input name="q" value="{{ $q }}" class="form-control" placeholder="名前・タグで検索">
   </div>
+  <div class="filter-pills">
+    @foreach($filterLabels as $key => $label)
+      <a class="pill {{ $filter===$key ? 'active' : '' }}"
+         href="{{ route('crm.customers', ['filter' => $key, 'q' => $q]) }}">
+        <i class="bi {{ $filterIcons[$key] }}"></i> {{ $label }}
+      </a>
+    @endforeach
+  </div>
+</form>
+
+<div style="margin-bottom:16px">
+  <a class="btn-glass" href="{{ route('crm.customer.create') }}">
+    <i class="bi bi-person-plus-fill"></i> お客さん追加
+  </a>
+</div>
+
+<div class="card-glass">
+  <div class="card-title">
+    <i class="bi bi-people-fill"></i>
+    結果：{{ $customers->count() }}件
+  </div>
+
+  @forelse($customers as $c)
+    @php
+      $d = $c->days_since_last_visit;
+      $dClass = $d >= 60 ? 'very-stale' : ($d >= 30 ? 'stale' : ($d >= 7 ? 'recent' : 'fresh'));
+    @endphp
+    <a href="{{ route('crm.customer.show', $c->id) }}" class="customer-row">
+      <div class="avatar" style="background:{{ $avatarColors[crc32($c->name) % count($avatarColors)] }}">{{ mb_substr($c->name, 0, 1) }}</div>
+      <div class="info">
+        <div class="name">{{ $c->name }}</div>
+        <div class="meta">
+          <i class="bi bi-calendar-check"></i> {{ $c->last_visit ?? '-' }}
+          @if($c->birthday) &middot; <i class="bi bi-gift"></i> {{ $c->birthday }} @endif
+        </div>
+        <div class="tags-wrap">
+          @foreach($c->tag as $t)
+            <span class="tag {{ $t === 'VIP' ? 'tag-vip' : '' }}">{{ $t }}</span>
+          @endforeach
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="days-ind {{ $dClass }}">{{ $d }}日</span>
+        <i class="bi bi-chevron-right chevron"></i>
+      </div>
+    </a>
+  @empty
+    <div class="empty-state">
+      <i class="bi bi-search"></i>
+      <div class="empty-title">見つからなかった</div>
+      <div class="empty-text">検索条件を変えてみて</div>
+    </div>
+  @endforelse
+</div>
 @endsection

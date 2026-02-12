@@ -1,53 +1,79 @@
 @extends('layouts.crm')
-@section('title', $customer['name'].' の詳細')
+@section('title', $customer->name.' の詳細')
+
+@php
+$avatarColors = ['#9b59b6','#e91e63','#3498db','#1abc9c','#e67e22','#e74c3c'];
+$visitIcons = ['来店'=>'bi-shop','同伴'=>'bi-cup-straw','アフター'=>'bi-moon-stars'];
+@endphp
 
 @section('content')
-  <div class="card p-3 mb-3">
-    <div class="d-flex justify-content-between align-items-start">
-      <div>
-        <div class="fs-5 fw-bold">{{ $customer['name'] }}</div>
-        <div class="small text-muted">
-          最終来店：{{ $customer['last_visit'] ?? '-' }}（{{ $customer['days_since_last_visit'] }}日）
-          / 誕生日：{{ $customer['birthday'] ?? '未設定' }}
-        </div>
-        <div class="mt-2 d-flex gap-1 flex-wrap">
-          @foreach($customer['tag'] as $t)
-            <span class="badge text-bg-light">{{ $t }}</span>
-          @endforeach
-        </div>
-      </div>
-      <a class="btn btn-outline-dark btn-sm rounded-pill" href="{{ route('crm.visits.create') }}">来店を記録</a>
-    </div>
 
-    <div class="mt-3 d-flex gap-2 flex-wrap">
-      <button class="btn btn-dark btn-sm rounded-pill" type="button">LINE送る（見た目だけ）</button>
-      <button class="btn btn-outline-dark btn-sm rounded-pill" type="button">誕生日を編集（見た目だけ）</button>
-      <button class="btn btn-outline-dark btn-sm rounded-pill" type="button">タグ編集（見た目だけ）</button>
+{{-- Hero --}}
+<div class="card-glass">
+  <div style="display:flex;gap:16px;align-items:center">
+    <div class="avatar avatar-lg" style="background:{{ $avatarColors[crc32($customer->name) % count($avatarColors)] }}">{{ mb_substr($customer->name, 0, 1) }}</div>
+    <div style="flex:1">
+      <div style="font-size:22px;font-weight:700">{{ $customer->name }}</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">
+        <i class="bi bi-calendar-check"></i> 最終：{{ $customer->last_visit ?? '-' }}（{{ $customer->days_since_last_visit }}日）
+        @if($customer->birthday) &middot; <i class="bi bi-gift"></i> {{ $customer->birthday }} @endif
+      </div>
+      <div class="tags-wrap">
+        @foreach($customer->tag as $t)
+          <span class="tag {{ $t === 'VIP' ? 'tag-vip' : '' }}">{{ $t }}</span>
+        @endforeach
+      </div>
     </div>
   </div>
 
-  <div class="card p-3 mb-3">
-    <div class="fw-bold mb-2">メモ</div>
-    @forelse($customer['memo'] as $m)
-      <div class="py-2 {{ !$loop->first ? 'border-top' : '' }}">
-        <div class="small text-muted">{{ $m['date'] }}</div>
-        <div>{{ $m['text'] }}</div>
-      </div>
-    @empty
-      <div class="text-muted">まだメモなし</div>
-    @endforelse
+  <div class="actions-grid">
+    <button class="action-btn" type="button"><i class="bi bi-chat-fill"></i> LINE送る</button>
+    <button class="action-btn" type="button"><i class="bi bi-gift"></i> 誕生日編集</button>
+    <button class="action-btn" type="button"><i class="bi bi-tags-fill"></i> タグ編集</button>
+    <a class="action-btn" href="{{ route('crm.visits.create', ['customer_id' => $customer->id]) }}"><i class="bi bi-calendar-plus"></i> 来店記録</a>
   </div>
+</div>
 
-  <div class="card p-3">
-    <div class="fw-bold mb-2">来店履歴</div>
-    @foreach($customer['visits'] as $v)
-      <div class="py-2 {{ !$loop->first ? 'border-top' : '' }}">
-        <div class="d-flex justify-content-between">
-          <div class="fw-semibold">{{ $v['type'] }}</div>
-          <div class="small text-muted">{{ $v['date'] }}</div>
+{{-- Memos --}}
+<div class="card-glass">
+  <div class="card-title"><i class="bi bi-sticky-fill"></i> メモ</div>
+
+  @forelse($customer->memo as $m)
+    <div style="padding:12px 0;{{ !$loop->first ? 'border-top:1px solid var(--glass-border)' : '' }}">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><i class="bi bi-calendar3"></i> {{ $m->date }}</div>
+      <div style="font-size:15px">{{ $m->text }}</div>
+    </div>
+  @empty
+    <div class="empty-state">
+      <i class="bi bi-sticky"></i>
+      <div class="empty-title">まだメモなし</div>
+    </div>
+  @endforelse
+</div>
+
+{{-- Visit History --}}
+<div class="card-glass">
+  <div class="card-title"><i class="bi bi-clock-history"></i> 来店履歴</div>
+
+  @forelse($customer->visits as $v)
+    <div style="padding:12px 0;{{ !$loop->first ? 'border-top:1px solid var(--glass-border)' : '' }}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="bi {{ $visitIcons[$v->type] ?? 'bi-shop' }} text-gold"></i>
+          <span style="font-weight:600">{{ $v->type }}</span>
         </div>
-        <div class="small text-muted">金額：{{ number_format($v['amount']) }} / {{ $v['note'] }}</div>
+        <span style="font-size:13px;color:var(--text-muted)">{{ $v->date }}</span>
       </div>
-    @endforeach
-  </div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">
+        @if($v->amount)<i class="bi bi-currency-yen"></i> {{ number_format($v->amount) }}@endif
+        @if($v->note) &middot; {{ $v->note }}@endif
+      </div>
+    </div>
+  @empty
+    <div class="empty-state">
+      <i class="bi bi-clock-history"></i>
+      <div class="empty-title">来店履歴なし</div>
+    </div>
+  @endforelse
+</div>
 @endsection

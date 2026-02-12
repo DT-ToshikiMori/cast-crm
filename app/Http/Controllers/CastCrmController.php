@@ -93,6 +93,17 @@ class CastCrmController extends Controller
             ]);
         }
 
+        // 未整理来店から追加した場合、自動で紐づけ
+        if ($request->input('from') === 'unassigned' && $request->input('visit_id')) {
+            $visit = auth()->user()->visits()->whereNull('customer_id')->find($request->input('visit_id'));
+            if ($visit) {
+                $visit->update(['customer_id' => $customer->id]);
+                return redirect()
+                    ->route('crm.customer.show', $customer->id)
+                    ->with('status', 'お客さんを登録して来店を紐づけたよ');
+            }
+        }
+
         return redirect()
             ->route('crm.customer.show', $customer->id)
             ->with('status', 'お客さんを登録したよ');
@@ -111,16 +122,29 @@ class CastCrmController extends Controller
             'type' => ['required', 'string', 'in:来店,同伴,アフター'],
             'amount' => ['nullable', 'integer', 'min:0'],
             'note' => ['nullable', 'string', 'max:500'],
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
         ]);
 
+        $customerId = null;
+        if (!empty($data['customer_id'])) {
+            auth()->user()->customers()->findOrFail($data['customer_id']);
+            $customerId = $data['customer_id'];
+        }
+
         auth()->user()->visits()->create([
-            'customer_id' => null,
+            'customer_id' => $customerId,
             'type' => $data['type'],
             'date' => now()->toDateString(),
             'time' => now()->format('H:i'),
             'amount' => $data['amount'] ?? null,
             'note' => $data['note'] ?? null,
         ]);
+
+        if ($customerId) {
+            return redirect()
+                ->route('crm.customer.show', $customerId)
+                ->with('status', '来店を記録したよ');
+        }
 
         return redirect()
             ->route('crm.visits.unassigned')
